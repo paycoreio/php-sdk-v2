@@ -2,14 +2,16 @@
 
 namespace Cloudipsp;
 
+use Cloudipsp\HttpClient\ClientInterface;
+
 class Configuration
 {
     /**
-     * @var int Mercahnt id
+     * @var int Merchant id
      */
     private static $MerchantID;
     /**
-     * @var string Secret ket
+     * @var string Secret key
      */
     private static $SecretKey;
     /**
@@ -129,12 +131,16 @@ class Configuration
     }
 
     /**
-     * @return mixed used Http Client
+     * @return ClientInterface used Http Client
      */
     public static function getHttpClient()
     {
-        $client = 'Cloudipsp\\HttpClient\\' . self::$HttpClient;
-        return new $client();
+        if (is_string(self::$HttpClient)) {
+            $client = 'Cloudipsp\\HttpClient\\' . self::$HttpClient;
+            return new $client();
+        }
+
+        return self::$HttpClient;
     }
 
     /**
@@ -142,9 +148,13 @@ class Configuration
      */
     public static function setHttpClient($client)
     {
-        $HttpClient = 'Cloudipsp\\HttpClient\\' . $client;
-        if (class_exists($HttpClient)) {
+        if ($client instanceof ClientInterface) {
             return self::$HttpClient = $client;
+        } else if (is_string($client)) {
+            $HttpClient = 'Cloudipsp\\HttpClient\\' . $client;
+            if (class_exists($HttpClient)) {
+                return self::$HttpClient = $client;
+            }
         } else {
             trigger_error('Client Class not found or name set up incorrectly. Available clients: HttpCurl, HttpGuzzle', E_USER_NOTICE);
             return self::$HttpClient = 'Cloudipsp\\HttpClient\\HttpCurl';

@@ -1,4 +1,5 @@
 <?php
+
 namespace Cloudipsp\HttpClient;
 
 interface ClientInterface
